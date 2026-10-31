@@ -1,0 +1,45 @@
+{
+  "guardrails": [
+    "Rules use data-quality fields only, never the target.",
+    "Every retained candidate excludes no more than 10% from any split.",
+    "Rule selection uses validation KS only, with a 70% recall floor.",
+    "The selected rule is evaluated once on the test partition."
+  ],
+  "selected_rule": "multiple_future_bureau_dates",
+  "selected_validation_metrics": {
+    "rule": "multiple_future_bureau_dates",
+    "train_exclusion_rate": 0.014969380811975519,
+    "validation_exclusion_rate": 0.02329564919492977,
+    "test_exclusion_rate": 0.011872455902306678,
+    "roc_auc": 0.6794544564807937,
+    "pr_auc": 0.3066050126941785,
+    "ks": 0.2738156009392812,
+    "gini": 0.35890891296158745,
+    "precision": 0.24068767908309455,
+    "recall": 0.7014613778705637,
+    "f1": 0.3584,
+    "brier_score": 0.22285916926708835,
+    "threshold": 0.45,
+    "true_negative": 1312,
+    "false_positive": 1060,
+    "false_negative": 143,
+    "true_positive": 336
+  },
+  "test_rows": 2913,
+  "test_metrics": {
+    "roc_auc": 0.6782119912478757,
+    "pr_auc": 0.3122105284459621,
+    "ks": 0.28776272949026205,
+    "gini": 0.35642398249575136,
+    "precision": 0.23485364193328795,
+    "recall": 0.7356076759061834,
+    "f1": 0.3560371517027864,
+    "brier_score": 0.22474417645798922,
+    "threshold": 0.45,
+    "true_negative": 1320,
+    "false_positive": 1124,
+    "false_negative": 124,
+    "true_positive": 345
+  },
+  "candidate_count": 12
+}

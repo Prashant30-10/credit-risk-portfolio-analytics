@@ -1,0 +1,45 @@
+{
+  "guardrails": [
+    "Customer-grouped 60/20/20 split retained.",
+    "No target-dependent row filtering.",
+    "Model and blend selection used validation metrics only.",
+    "The test partition was evaluated once after selection."
+  ],
+  "selected_candidate": "blend__extra_trees__linear_logistic_c0.3__w0.75",
+  "selected_specification": {
+    "type": "blend",
+    "left_model": "extra_trees",
+    "right_model": "linear_logistic_c0.3",
+    "left_weight": 0.75
+  },
+  "validation_metrics": {
+    "roc_auc": 0.6782971072331773,
+    "pr_auc": 0.31161027011151865,
+    "ks": 0.29900605775451383,
+    "gini": 0.35659421446635453,
+    "precision": 0.25090645395213923,
+    "recall": 0.7061224489795919,
+    "f1": 0.37025147137506687,
+    "threshold": 0.38
+  },
+  "test_metrics": {
+    "roc_auc": 0.678161194928945,
+    "pr_auc": 0.30596215618039485,
+    "ks": 0.2963295090495879,
+    "gini": 0.35632238985789,
+    "precision": 0.23500352858151025,
+    "recall": 0.7055084745762712,
+    "f1": 0.3525674960296453,
+    "brier_score": 0.18215508303462935,
+    "threshold": 0.38,
+    "true_negative": 1392,
+    "false_positive": 1084,
+    "false_negative": 139,
+    "true_positive": 333,
+    "precision_at_top_20_pct": 0.31186440677966104,
+    "recall_at_top_20_pct": 0.3898305084745763,
+    "precision_lift_at_top_20_pct": 1.9478310830221204,
+    "pr_auc_lift_vs_base_rate": 1.9109670263131442
+  },
+  "candidate_count": 59
+}

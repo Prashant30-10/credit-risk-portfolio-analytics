@@ -1,0 +1,31 @@
+{
+  "status": "Final refit of the frozen validation-selected specification.",
+  "development_accounts": 11737,
+  "test_accounts": 2948,
+  "selected_specification": {
+    "type": "blend",
+    "left_model": "extra_trees",
+    "right_model": "linear_logistic_c0.3",
+    "left_weight": 0.75
+  },
+  "threshold_frozen_from_validation": 0.38,
+  "test_metrics": {
+    "roc_auc": 0.675268167629583,
+    "pr_auc": 0.30649522118728484,
+    "ks": 0.2936563894745489,
+    "gini": 0.35053633525916594,
+    "precision": 0.2296243798724309,
+    "recall": 0.6864406779661016,
+    "f1": 0.3441317047265003,
+    "brier_score": 0.18283024354813648,
+    "threshold": 0.38,
+    "true_negative": 1389,
+    "false_positive": 1087,
+    "false_negative": 148,
+    "true_positive": 324,
+    "precision_at_top_20_pct": 0.30847457627118646,
+    "recall_at_top_20_pct": 0.3855932203389831,
+    "precision_lift_at_top_20_pct": 1.9266590060327495,
+    "pr_auc_lift_vs_base_rate": 1.9142964238561775
+  }
+}

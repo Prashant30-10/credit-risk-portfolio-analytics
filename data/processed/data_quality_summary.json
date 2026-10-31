@@ -1,0 +1,13 @@
+{
+  "generated_at_reference_date": "2026-10-27",
+  "account_rows": 14685,
+  "customer_rows": 10000,
+  "default_count": 2364,
+  "default_rate": 0.1609805924412666,
+  "gender_labels_standardized": 600,
+  "employment_tenure_implausible": 510,
+  "customer_since_after_origination": 7293,
+  "collections_before_origination": 3875,
+  "bureau_future_close_dates": 1958,
+  "bureau_customers_missing": 1008
+}

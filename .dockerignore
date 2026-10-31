@@ -1,0 +1,12 @@
+.git
+.pytest_cache
+__pycache__
+*.py[cod]
+.env
+.streamlit/secrets.toml
+docs/_architecture_preview.png
+docs/_solution_overview_preview.png
+models/experiment_final_refit.joblib
+data/processed/account_scored_6m.csv
+data/processed/account_scored_10m.csv
+data/processed/account_scored_12m.csv
