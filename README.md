@@ -112,7 +112,7 @@ result files.
 ### Ask the Portfolio
 
 - Trigger: an analyst submits a natural-language question.
-- Grounding: the LLM can select only approved metrics, dimensions and exact categorical filters. Pandas calculates all figures.
+- Grounding: the LLM can select only approved metrics, dimensions, exact categorical filters and a typed highest/lowest ranking intent. Equivalent natural-language phrasing is interpreted by the LLM; Pandas performs the validated ordering and calculates all figures.
 - False positive: a question is mapped to the wrong approved query.
 - False negative: a valid portfolio question is declined.
 - Human step: the analyst verifies the displayed query provenance before acting.
