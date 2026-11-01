@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.analytics import execute_query
+from src.analytics import execute_query, portfolio_insights
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,3 +31,19 @@ def test_query_rejects_unknown_filter_value():
     else:
         raise AssertionError("Unknown filter value should be rejected")
 
+
+
+def test_portfolio_insights_are_honest_for_narrow_filters():
+    account = pd.read_csv(ROOT / "data" / "processed" / "account_scored.csv")
+    narrow = account.loc[
+        account["region"].eq("South")
+        & account["employment_type"].eq("Unemployed")
+        & account["risk_band"].eq("High")
+    ]
+
+    insights = portfolio_insights(narrow)
+    rendered = " ".join(finding for finding, _ in insights).casefold()
+
+    assert "nan" not in rendered
+    assert "does not meet the 50-account reliability threshold" in rendered
+    assert "with at least 50 accounts is" not in rendered

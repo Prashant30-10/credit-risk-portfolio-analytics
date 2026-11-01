@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.llm_assistant import ask_portfolio  # noqa: E402
+from src.analytics import portfolio_insights  # noqa: E402
 
 
 st.set_page_config(
@@ -103,12 +104,13 @@ if page == "Portfolio":
         st.warning("No accounts match the selected filters.")
         st.stop()
 
-    cols = st.columns(5)
-    cols[0].metric("Accounts", f"{len(data):,}")
-    cols[1].metric("Customers", f"{data.customer_id.nunique():,}")
-    cols[2].metric("Original exposure", f"${data.loan_amount.sum()/1e6:,.1f}M")
-    cols[3].metric("Default rate", f"{data.target_default.mean():.1%}")
-    cols[4].metric("High-risk accounts", f"{data.risk_band.eq('High').mean():.1%}")
+    top_metrics = st.columns(3)
+    top_metrics[0].metric("Accounts", f"{len(data):,}")
+    top_metrics[1].metric("Customers", f"{data.customer_id.nunique():,}")
+    top_metrics[2].metric("Original exposure", f"${data.loan_amount.sum()/1e6:,.1f}M")
+    bottom_metrics = st.columns(2)
+    bottom_metrics[0].metric("Default rate", f"{data.target_default.mean():.1%}")
+    bottom_metrics[1].metric("High-risk accounts", f"{data.risk_band.eq('High').mean():.1%}")
 
     left, right = st.columns([1.1, 1])
     with left:
@@ -219,48 +221,7 @@ if page == "Portfolio":
         st.plotly_chart(fig, width="stretch")
 
     st.subheader("Portfolio insights and actions")
-    loan_signal = data.groupby("loan_type").target_default.agg(["mean", "size"]).sort_values("mean", ascending=False)
-    employment_signal = data.groupby("employment_type").target_default.agg(["mean", "size"]).sort_values("mean", ascending=False)
-    region_signal = data.groupby("region").target_default.agg(["mean", "size"]).sort_values("mean", ascending=False)
-    age_signal = data.groupby("age_band").target_default.agg(["mean", "size"]).sort_values("mean", ascending=False)
-    income_signal = data.groupby("income_band").target_default.mean()
-    cross_all = (
-        data.groupby(["employment_type", "loan_type"])
-        .target_default.agg(["mean", "size"])
-        .sort_values("mean", ascending=False)
-    )
-    cross_signal = cross_all.loc[cross_all["size"] >= 50]
-    if cross_signal.empty:
-        cross_signal = cross_all
-    cross_employment, cross_loan = cross_signal.index[0]
-    insights = [
-        (
-            f"{loan_signal.index[0]} has the highest loan-type default rate at {loan_signal.iloc[0]['mean']:.1%} "
-            f"across {int(loan_signal.iloc[0]['size']):,} accounts.",
-            "Review product underwriting, pricing and early-warning limits for this product first.",
-        ),
-        (
-            f"The lowest-income quintile defaults at {income_signal.get('Q1 Lowest', float('nan')):.1%}, compared with "
-            f"{income_signal.get('Q5 Highest', float('nan')):.1%} in the highest-income quintile.",
-            "Strengthen affordability monitoring and prioritize proactive assistance for lower-income borrowers.",
-        ),
-        (
-            f"{employment_signal.index[0]} borrowers have the highest employment-segment default rate at "
-            f"{employment_signal.iloc[0]['mean']:.1%}.",
-            "Use this segment for targeted monitoring, while retaining human review and fair-lending controls.",
-        ),
-        (
-            f"{age_signal.index[0]} is the highest-risk age band at {age_signal.iloc[0]['mean']:.1%}; "
-            f"{region_signal.index[0]} is the highest-risk region at {region_signal.iloc[0]['mean']:.1%}.",
-            "Track both cuts for drift and capacity planning rather than applying age or geography as an automatic adverse-action rule.",
-        ),
-        (
-            f"The highest-risk employment × loan combination with at least 50 accounts is "
-            f"{cross_employment} / {cross_loan} at {cross_signal.iloc[0]['mean']:.1%} "
-            f"({int(cross_signal.iloc[0]['size']):,} accounts).",
-            "Create a focused review queue for this intersection and validate whether the pattern persists out of sample.",
-        ),
-    ]
+    insights = portfolio_insights(data)
     for number, (finding, action) in enumerate(insights, 1):
         st.markdown(f"**{number}. Finding:** {finding}  \n**So what:** {action}")
 
@@ -275,12 +236,13 @@ elif page == "Account review":
     row = account.loc[account.account_id.astype(str).eq(selected)].iloc[0]
     repayment_account = repayment.loc[repayment.account_id.astype(str).eq(selected)].copy()
 
-    cols = st.columns(5)
-    cols[0].metric("Risk score", f"{row.risk_score:.1f}/100")
-    cols[1].metric("Risk band", row.risk_band)
-    cols[2].metric("Loan type", row.loan_type)
-    cols[3].metric("Outstanding", f"${row.latest_outstanding_balance:,.0f}")
-    cols[4].metric("Observed outcome", "Default" if row.target_default else "Performing")
+    top_metrics = st.columns(3)
+    top_metrics[0].metric("Risk score", f"{row.risk_score:.1f}/100")
+    top_metrics[1].metric("Risk band", row.risk_band)
+    top_metrics[2].metric("Loan type", row.loan_type)
+    bottom_metrics = st.columns(2)
+    bottom_metrics[0].metric("Outstanding", f"${row.latest_outstanding_balance:,.0f}")
+    bottom_metrics[1].metric("Observed outcome", "Default" if row.target_default else "Performing")
 
     st.markdown(f"**Key risk indicators:** {row.key_risk_indicators}")
     left, right = st.columns([1.5, 1])
@@ -387,7 +349,9 @@ elif page == "Anomaly review":
                 "Decision", options=["Pending", "Confirm", "Dismiss", "Escalate"], required=True
             ),
             "review_note": st.column_config.TextColumn("Analyst note"),
-            "anomaly_score": st.column_config.ProgressColumn("Anomaly score", min_value=0, max_value=100),
+            "anomaly_score": st.column_config.ProgressColumn(
+                "Anomaly score (0–100)", min_value=0, max_value=100, format="%.1f"
+            ),
         },
         key="anomaly_table",
     )
