@@ -33,6 +33,8 @@ DimensionName = Literal[
     "origination_year",
 ]
 
+RankingIntent = Literal["highest", "lowest"]
+
 
 class FilterSpec(BaseModel):
     field: DimensionName
@@ -45,6 +47,12 @@ class PortfolioQuerySpec(BaseModel):
     metric: MetricName | None = Field(description="Approved metric to calculate.")
     group_by: DimensionName | None = Field(description="Optional approved grouping dimension.")
     filters: list[FilterSpec] = Field(description="Zero or more exact categorical filters.")
+    ranking_intent: RankingIntent = Field(
+        description=(
+            "Semantic ranking intent for grouped results: highest for the greatest "
+            "metric value and lowest for the least metric value."
+        )
+    )
     top_n: int = Field(ge=1, le=20, description="Number of grouped rows to return.")
 
 
@@ -63,8 +71,14 @@ Approved dimensions: {json.dumps(DIMENSIONS)}
 Available categorical values: {json.dumps(catalog)}
 Return answerable=false when the question needs unsupported data, free text,
 external knowledge, personal advice, causality, or a metric outside this schema.
-Use exact available category values in filters. For 'highest' or 'lowest' questions,
-set group_by to the relevant dimension. Use top_n=5 unless the user requests another count.
+Use exact available category values in filters. Interpret the user's semantic ranking
+intent rather than matching a fixed keyword list. Set ranking_intent="highest" when the
+user wants the greatest metric value and ranking_intent="lowest" when the user wants
+the least metric value. This includes equivalent natural-language phrasing such as
+maximum versus minimum and contextual phrasing such as riskiest versus safest when the
+metric is a risk or default rate. For grouped comparisons without an explicit direction,
+default to ranking_intent="highest". Set group_by to the relevant dimension and use
+top_n=5 unless the user requests another count.
 """.strip()
     client = OpenAI(api_key=api_key)
     response = client.responses.parse(
@@ -90,4 +104,5 @@ set group_by to the relevant dimension. Use top_n=5 unless the user requests ano
         group_by=spec.group_by,
         filters=[item.model_dump() for item in spec.filters],
         top_n=spec.top_n,
+        ranking_intent=spec.ranking_intent,
     )

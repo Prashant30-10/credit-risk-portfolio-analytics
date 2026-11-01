@@ -140,6 +140,7 @@ def portfolio_insights(
         (cross_finding, cross_action),
     ]
 
+
 def _metric_series(grouped, metric: str):
     if metric == "default_rate":
         return grouped["target_default"].mean()
@@ -174,11 +175,14 @@ def execute_query(
     group_by: str | None,
     filters: list[dict[str, str]] | None = None,
     top_n: int = 5,
+    ranking_intent: str = "highest",
 ) -> QueryResult:
     if metric not in METRICS:
         raise ValueError("The requested metric is not approved.")
     if group_by is not None and group_by not in DIMENSIONS:
         raise ValueError("The requested grouping is not approved.")
+    if ranking_intent not in {"highest", "lowest"}:
+        raise ValueError("The requested ranking intent is not approved.")
 
     data = frame.copy()
     data["is_delinquent_12m"] = data["max_dpd_12m"].gt(0)
@@ -198,11 +202,14 @@ def execute_query(
 
     if group_by:
         values = _metric_series(data.groupby(group_by, dropna=False), metric)
-        result = values.rename("value").reset_index().sort_values("value", ascending=False)
+        ascending = ranking_intent == "lowest"
+        result = values.rename("value").reset_index().sort_values(
+            "value", ascending=ascending
+        )
         result = result.head(max(1, min(int(top_n), 20)))
         leader = result.iloc[0]
         answer = (
-            f"{leader[group_by]} has the highest {METRICS[metric].lower()} at "
+            f"{leader[group_by]} has the {ranking_intent} {METRICS[metric].lower()} at "
             f"{_format_value(metric, float(leader['value']))}. "
             f"This is based on {len(data):,} matching account records."
         )
@@ -220,6 +227,7 @@ def execute_query(
     provenance += f"; metric: {metric}"
     if group_by:
         provenance += f"; grouped by: {group_by}"
+        provenance += f"; ranking: {ranking_intent}"
     return QueryResult(answer=answer, table=result, provenance=provenance)
 
 
