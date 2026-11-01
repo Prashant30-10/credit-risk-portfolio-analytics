@@ -373,16 +373,25 @@ elif page == "Anomaly review":
 else:
     header("Methodology and controls", "Model performance, data quality and production monitoring")
     test = model_metrics["test"]
-    cols = st.columns(6)
-    for column, key, fmt in [
-        (cols[0], "ROC AUC", "roc_auc"),
-        (cols[1], "KS", "ks"),
-        (cols[2], "Gini", "gini"),
-        (cols[3], "Precision", "precision"),
-        (cols[4], "Recall", "recall"),
-        (cols[5], "F1", "f1"),
-    ]:
-        column.metric(key, f"{test[fmt]:.3f}")
+
+    methodology_metrics = [
+        ("ROC AUC", "roc_auc"),
+        ("KS", "ks"),
+        ("Gini", "gini"),
+        ("Precision", "precision"),
+        ("Recall", "recall"),
+        ("F1", "f1"),
+    ]
+
+    for start in range(0, len(methodology_metrics), 3):
+        metric_columns = st.columns(3)
+
+        for column, (label, field) in zip(
+            metric_columns,
+            methodology_metrics[start : start + 3],
+        ):
+            column.metric(label, f"{test[field]:.3f}")
+
     st.caption(
         f"Selected model: {model_metrics['selected_model']} · threshold {test['threshold']:.2f} · "
         f"customer-grouped test set of {model_metrics['test_accounts']:,} accounts"
